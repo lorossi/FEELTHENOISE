@@ -1,8 +1,8 @@
 class Sketch extends Engine {
   preload() {
     // temp canvas parameters
-    const width = 250;
-    const height = 250;
+    const width = 500;
+    const height = 500;
     const border = 0.1 * height;
     this._ratio = this._height / height;
     // create temp canvas
@@ -18,7 +18,7 @@ class Sketch extends Engine {
     temp_ctx.fillStyle = "white";
     temp_ctx.textAlign = "center";
     temp_ctx.textBaseline = "middle";
-    temp_ctx.font = `${height / 3.5}px Hack`;
+    temp_ctx.font = `${height / 3}px Hack`;
     temp_ctx.fillText("FEEL", width / 2, (height - border / 2) / 6 + border / 2);
     temp_ctx.fillText("THE", width / 2, (height - border / 2) / 2 + border / 2);
     temp_ctx.fillText("NOISE", width / 2, (height - border / 2) * 5 / 6 + border / 2);
@@ -47,11 +47,11 @@ class Sketch extends Engine {
     // parameters
     this._duration = 600;
     this._recording = false;
-    this._show_fps = false;
+    this._show_fps = true;
     this._lines_spacing = 15;
     this._border = 0;
-    this._scl = 3;
-    this._noise_ampl = this._lines_spacing;
+    this._scl = 1;
+    this._noise_ampl = [this._lines_spacing / 3.5, 2];
     // sketch setup
     console.clear();
     // setup capturer
@@ -91,9 +91,8 @@ class Sketch extends Engine {
 
       for (let x = 0; x <= this._width; x += this._scl) {
         const col_picked = line_picked.filter(p => Math.abs(p.x - x) < this._ratio);
-        const amplitude = col_picked.length > 0 ? this._noise_ampl : 3;
-
-        const n = random() * amplitude * modulation;
+        const amplitude = col_picked.length > 0 ? this._noise_ampl[0] : this._noise_ampl[1];
+        const n = noise(x) * amplitude * modulation;
         this._ctx.lineTo(x, y - n);
       }
       this._ctx.stroke();
@@ -126,6 +125,11 @@ class Sketch extends Engine {
 
 const easeInOut = x => {
   return x < 0.5 ? 16 * Math.pow(x, 5) : 1 - Math.pow(-2 * x + 2, 5) / 2;
+};
+
+
+const noise = (x) => {
+  return Math.cos(x / 10 * Math.PI * 2 + random(0, Math.PI / 2));
 };
 
 const xy_from_index = (i, width, ratio = 1) => {
