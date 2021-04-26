@@ -4,6 +4,15 @@ body *, body {
   overflow: hidden;
 }
 
+@font-face {
+  font-family: Hack;
+  src: url(/src/fonts/Hack-Bold.ttf);
+}
+
+body {
+  font-family: Hack;
+}
+
 .container {
   width: 100vw;
   height: 100vh;
