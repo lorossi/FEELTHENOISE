@@ -1,8 +1,11 @@
+const TWO_PI = Math.PI * 2;
+const PI = Math.PI;
+
 class Sketch extends Engine {
   preload() {
     // temp canvas parameters
-    const width = 250;
-    const height = 250;
+    const width = 200;
+    const height = 200;
     const border = 0.1 * height;
     this._ratio = this._height / height;
     // create temp canvas
@@ -45,10 +48,10 @@ class Sketch extends Engine {
 
   setup() {
     // parameters
-    this._duration = 600;
+    this._duration = 900;
     this._recording = false;
     this._show_fps = false;
-    this._lines_spacing = 15;
+    this._lines_spacing = 20;
     this._border = 0;
     this._scl = 1;
     this._noise_ampl = [this._lines_spacing / 2 * 0.9, 3];
@@ -69,46 +72,47 @@ class Sketch extends Engine {
     }
 
     const percent = (this._frameCount % this._duration) / this._duration;
-    const eased_percent = easeInOut(percent);
-
-    const time_theta = eased_percent * Math.PI * 2;
-    const modulation = Math.sin(time_theta / 2);
+    const time_theta = ease(percent) * PI;
 
     // DRAW
     const dy = this._height * this._border / 2;
+    const channel = 200 + 40 * Math.sin(time_theta);
+    const alpha = 0.8 + 0.2 * Math.sin(time_theta);
 
     this._ctx.save();
     this.background("rgb(15, 15, 15)");
-    this._ctx.strokeStyle = "rgb(230, 230, 230)";
-    this._ctx.lineWidth = 1;
+    this._ctx.strokeStyle = `rgb(${channel}, ${channel}, ${channel}, ${alpha})`;
+    this._ctx.lineWidth = 2;
 
 
     for (let y = dy + this._lines_spacing / 2; y < this._height - dy; y += this._lines_spacing) {
       const line_picked = this._pixels.filter(p => Math.abs(p.y - y) < this._ratio);
+      const height_percent = y / this._height;
+      this._ctx.save();
+      this._ctx.translate(0, y);
       this._ctx.beginPath();
-      this._ctx.moveTo(0, y);
+      this._ctx.moveTo(0, 0);
 
       for (let x = 0; x <= this._width; x += this._scl) {
         const col_picked = line_picked.filter(p => Math.abs(p.x - x) < this._ratio);
-        const amplitude = col_picked.length > 0 ? this._noise_ampl[0] : this._noise_ampl[1];
-        const phi = col_picked.length > 0 ? random(0, Math.PI) : random(0, Math.PI / 4);
-        const n = noise(x, phi) * amplitude * modulation;
-        this._ctx.lineTo(x, y - n);
+        const width_percent = x / this._width;
+        const phi = height_percent * TWO_PI * 8 + percent * TWO_PI * 16;
+        const ampl = this._lines_spacing * Math.sin(width_percent * TWO_PI * 25 + phi) * 0.35;
+
+        let n = 1;
+        if (col_picked.length > 0) {
+          n += Math.sin(time_theta) * noise(x) * 1.5;
+        }
+
+        this._ctx.lineTo(x, n * ampl);
       }
       this._ctx.stroke();
+      this._ctx.restore();
     }
 
 
     this._ctx.restore();
 
-    // show FPS
-    if (this._show_fps) {
-      this._ctx.save();
-      this._ctx.fillStyle = "red";
-      this._ctx.font = "30px Hack";
-      this._ctx.fillText(parseInt(this._frameRate), 40, 40);
-      this._ctx.restore();
-    }
     // handle recording
     if (this._recording) {
       if (this._frameCount < this._duration) {
@@ -120,17 +124,27 @@ class Sketch extends Engine {
         console.log("%c Recording ended", "color: red; font-size: 2rem");
       }
     }
+
+    // show FPS
+    if (this._show_fps) {
+      this._ctx.save();
+      this._ctx.fillStyle = "red";
+      this._ctx.font = "30px Hack";
+      this._ctx.fillText(parseInt(this._frameRate), 40, 40);
+      this._ctx.restore();
+    }
   }
 }
 
-const easeInOut = x => {
-  return x < 0.5 ? 16 * Math.pow(x, 5) : 1 - Math.pow(-2 * x + 2, 5) / 2;
+const noise = x => {
+  /*let n = 0;
+  const omega = [5, 23, 29, 37, 39, 47, 49];
+  omega.forEach(o => n += Math.cos(x * o) / omega.length);
+  return (1 + n) / 2;*/
+  return random(-1, 1);
 };
 
-
-const noise = (x, phi) => {
-  return Math.cos(x / 10 * Math.PI * 2 + phi);
-};
+const ease = x => -(Math.cos(PI * x) - 1) / 2;
 
 const xy_from_index = (i, width, ratio = 1) => {
   const x = i % width;
