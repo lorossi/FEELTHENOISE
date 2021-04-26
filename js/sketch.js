@@ -1,8 +1,8 @@
 class Sketch extends Engine {
   preload() {
     // temp canvas parameters
-    const width = 500;
-    const height = 500;
+    const width = 250;
+    const height = 250;
     const border = 0.1 * height;
     this._ratio = this._height / height;
     // create temp canvas
@@ -18,7 +18,7 @@ class Sketch extends Engine {
     temp_ctx.fillStyle = "white";
     temp_ctx.textAlign = "center";
     temp_ctx.textBaseline = "middle";
-    temp_ctx.font = `${height / 3}px Hack`;
+    temp_ctx.font = `${(height - border) / 3}px Hack`;
     temp_ctx.fillText("FEEL", width / 2, (height - border / 2) / 6 + border / 2);
     temp_ctx.fillText("THE", width / 2, (height - border / 2) / 2 + border / 2);
     temp_ctx.fillText("NOISE", width / 2, (height - border / 2) * 5 / 6 + border / 2);
@@ -47,11 +47,11 @@ class Sketch extends Engine {
     // parameters
     this._duration = 600;
     this._recording = false;
-    this._show_fps = true;
+    this._show_fps = false;
     this._lines_spacing = 15;
     this._border = 0;
     this._scl = 1;
-    this._noise_ampl = [this._lines_spacing / 3.5, 2];
+    this._noise_ampl = [this._lines_spacing / 2 * 0.9, 3];
     // sketch setup
     console.clear();
     // setup capturer
@@ -78,21 +78,21 @@ class Sketch extends Engine {
     const dy = this._height * this._border / 2;
 
     this._ctx.save();
-    this.background("black");
-    this._ctx.strokeStyle = "white";
-    this._ctx.lineWidth = 2;
+    this.background("rgb(15, 15, 15)");
+    this._ctx.strokeStyle = "rgb(230, 230, 230)";
+    this._ctx.lineWidth = 1;
 
 
     for (let y = dy + this._lines_spacing / 2; y < this._height - dy; y += this._lines_spacing) {
       const line_picked = this._pixels.filter(p => Math.abs(p.y - y) < this._ratio);
-
       this._ctx.beginPath();
       this._ctx.moveTo(0, y);
 
       for (let x = 0; x <= this._width; x += this._scl) {
         const col_picked = line_picked.filter(p => Math.abs(p.x - x) < this._ratio);
         const amplitude = col_picked.length > 0 ? this._noise_ampl[0] : this._noise_ampl[1];
-        const n = noise(x) * amplitude * modulation;
+        const phi = col_picked.length > 0 ? random(0, Math.PI) : random(0, Math.PI / 4);
+        const n = noise(x, phi) * amplitude * modulation;
         this._ctx.lineTo(x, y - n);
       }
       this._ctx.stroke();
@@ -128,8 +128,8 @@ const easeInOut = x => {
 };
 
 
-const noise = (x) => {
-  return Math.cos(x / 10 * Math.PI * 2 + random(0, Math.PI / 2));
+const noise = (x, phi) => {
+  return Math.cos(x / 10 * Math.PI * 2 + phi);
 };
 
 const xy_from_index = (i, width, ratio = 1) => {
