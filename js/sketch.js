@@ -7,7 +7,7 @@ class Sketch extends Engine {
     const width = 200;
     const height = 200;
     const border = 0.1 * height;
-    this._ratio = this._height / height;
+    this._ratio = this._height / height; // ratio between temp canvas and real canvas
     // create temp canvas
     let temp_canvas;
     temp_canvas = document.createElement("canvas");
@@ -33,17 +33,17 @@ class Sketch extends Engine {
 
     // now it's time to reduce the array
     // keep track only if the pixels is empty or not
-    let non_black_pixels = [];
+    this._pixels = [];
     for (let i = 0; i < pixels.data.length; i += 4) {
       for (let j = 0; j < 3; j++) {
         if (pixels.data[i + j] > 0) {
+          // get pos (1D array to 2D array) and push to the array of pixels
           const pos = xy_from_index(parseInt(i / 4), pixels.width, this._ratio);
-          non_black_pixels.push(pos);
+          this._pixels.push(pos);
           break;
         }
       }
     }
-    this._pixels = [...non_black_pixels];
   }
 
   setup() {
@@ -53,8 +53,7 @@ class Sketch extends Engine {
     this._show_fps = false;
     this._lines_spacing = 20;
     this._border = 0;
-    this._scl = 1;
-    this._noise_ampl = [this._lines_spacing / 2 * 0.9, 3];
+    this._scl = 1; // pixel scaling in final image
     // sketch setup
     console.clear();
     // setup capturer
@@ -72,12 +71,12 @@ class Sketch extends Engine {
     }
 
     const percent = (this._frameCount % this._duration) / this._duration;
-    const time_theta = ease(percent) * PI;
+    const time_theta = percent * PI; // no need for easing, it's going to be smoothed by sine funciton
 
     // DRAW
-    const dy = this._height * this._border / 2;
-    const channel = 200 + 40 * Math.sin(time_theta);
-    const alpha = 0.8 + 0.2 * Math.sin(time_theta);
+    const channel = 200 + 40 * Math.sin(time_theta); // RGB channel value
+    const alpha = 0.8 + 0.2 * Math.sin(time_theta); // RGB alpha
+    const dy = this._height * this._border / 2; // height displacement
 
     this._ctx.save();
     this.background("rgb(15, 15, 15)");
@@ -86,22 +85,26 @@ class Sketch extends Engine {
 
 
     for (let y = dy + this._lines_spacing / 2; y < this._height - dy; y += this._lines_spacing) {
+      // is the line in the old canvas aswell?
       const line_picked = this._pixels.filter(p => Math.abs(p.y - y) < this._ratio);
-      const height_percent = y / this._height;
       this._ctx.save();
       this._ctx.translate(0, y);
       this._ctx.beginPath();
       this._ctx.moveTo(0, 0);
 
       for (let x = 0; x <= this._width; x += this._scl) {
-        const col_picked = line_picked.filter(p => Math.abs(p.x - x) < this._ratio);
-        const width_percent = x / this._width;
-        const phi = height_percent * TWO_PI * 8 + percent * TWO_PI * 16;
-        const ampl = this._lines_spacing * Math.sin(width_percent * TWO_PI * 25 + phi) * 0.35;
+        const height_percent = y / this._height; // height ratio
+        const width_percent = x / this._width; // width ratio
+        const omega = TWO_PI * 25; // sin omega
+        const phi = height_percent * TWO_PI * 4 + percent * TWO_PI * 16; // sin phase
+        const ampl = this._lines_spacing * Math.sin(width_percent * omega + phi) * 0.35; // sin amplitude
 
+        // is this col picked? since the line is already picked, the pixel is picked
+        const col_picked = line_picked.filter(p => Math.abs(p.x - x) < this._ratio);
         let n = 1;
         if (col_picked.length > 0) {
-          n += Math.sin(time_theta) * noise(x) * 1.5;
+          // add some noise if the letter is behind this pixel
+          n += Math.sin(width_percent * omega * 10) * Math.sin(time_theta) * 1.5;
         }
 
         this._ctx.lineTo(x, n * ampl);
@@ -135,14 +138,6 @@ class Sketch extends Engine {
     }
   }
 }
-
-const noise = x => {
-  /*let n = 0;
-  const omega = [5, 23, 29, 37, 39, 47, 49];
-  omega.forEach(o => n += Math.cos(x * o) / omega.length);
-  return (1 + n) / 2;*/
-  return random(-1, 1);
-};
 
 const ease = x => -(Math.cos(PI * x) - 1) / 2;
 
