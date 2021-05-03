@@ -3,11 +3,27 @@ const PI = Math.PI;
 
 class Sketch extends Engine {
   preload() {
+    // parameters
+    this._duration = 900;
+    this._recording = false;
+    this._show_fps = false;
+    this._lines_spacing = 20;
+    this._border = 0;
+    this._scl = 1; // pixel scaling in final image
+    this._temp_canvas_size = 200;
+
+    this._angle = Math.PI / 2;
+
+    this.loadTextPixels();
+  }
+
+  loadTextPixels() {
     // temp canvas parameters
-    const width = 200;
-    const height = 200;
+    const height = this._temp_canvas_size;
+    const width = this._temp_canvas_size;
     const border = 0.1 * height;
-    this._ratio = this._height / height; // ratio between temp canvas and real canvas
+    this._temp_canvas_ratio = this._height / this._temp_canvas_size; // ratio between temp canvas and real canvas
+
     // create temp canvas
     let temp_canvas;
     temp_canvas = document.createElement("canvas");
@@ -38,7 +54,7 @@ class Sketch extends Engine {
       for (let j = 0; j < 3; j++) {
         if (pixels.data[i + j] > 0) {
           // get pos (1D array to 2D array) and push to the array of pixels
-          const pos = xy_from_index(parseInt(i / 4), pixels.width, this._ratio);
+          const pos = xy_from_index(parseInt(i / 4), pixels.width, this._temp_canvas_ratio);
           this._pixels.push(pos);
           break;
         }
@@ -47,13 +63,6 @@ class Sketch extends Engine {
   }
 
   setup() {
-    // parameters
-    this._duration = 900;
-    this._recording = false;
-    this._show_fps = false;
-    this._lines_spacing = 20;
-    this._border = 0;
-    this._scl = 1; // pixel scaling in final image
     // sketch setup
     console.clear();
     // setup capturer
@@ -87,7 +96,7 @@ class Sketch extends Engine {
 
     for (let y = dy + this._lines_spacing / 2; y < this._height - dy; y += this._lines_spacing) {
       // is the line in the old canvas aswell?
-      const line_picked = this._pixels.filter(p => Math.abs(p.y - y) < this._ratio);
+      const line_picked = this._pixels.filter(p => Math.abs(p.y - y) < this._temp_canvas_ratio);
       this._ctx.save();
       this._ctx.translate(0, y);
       this._ctx.beginPath();
@@ -101,7 +110,7 @@ class Sketch extends Engine {
 
         let ampl = this._lines_spacing * Math.sin(width_percent * omega + phi) * 0.35; // sin amplitude
         // is this col picked? since the line is already picked, the pixel is picked
-        const col_picked = line_picked.filter(p => Math.abs(p.x - x) < this._ratio);
+        const col_picked = line_picked.filter(p => Math.abs(p.x - x) < this._temp_canvas_ratio);
         if (col_picked.length > 0) {
           // add some noise if the letter is behind this pixel
           ampl += Math.sin(time_theta) * random(-1, 1) * this._lines_spacing * 0.5;
@@ -157,4 +166,12 @@ const random = (a, b) => {
   if (a == undefined && b == undefined) return random(0, 1);
   else if (b == undefined) return random(0, a);
   else if (a != undefined && b != undefined) return Math.random() * (b - a) + a;
+};
+
+const distSq = (x1, y1, x2, y2) => {
+  return Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2);
+};
+
+const dist = (x1, y1, x2, y2) => {
+  return Math.sqrt(distSq(x1, y1, x2, y2));
 };
