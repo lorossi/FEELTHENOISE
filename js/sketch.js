@@ -71,10 +71,11 @@ class Sketch extends Engine {
     }
 
     const percent = (this._frameCount % this._duration) / this._duration;
-    const time_theta = percent * PI; // no need for easing, it's going to be smoothed by sine funciton
+    //const percent = 0.5;
+    const time_theta = ease(percent) * PI;
 
     // DRAW
-    const channel = 200 + 40 * Math.sin(time_theta); // RGB channel value
+    const channel = 220 + 20 * Math.sin(time_theta); // RGB channel value
     const alpha = 0.8 + 0.2 * Math.sin(time_theta); // RGB alpha
     const dy = this._height * this._border / 2; // height displacement
 
@@ -95,19 +96,20 @@ class Sketch extends Engine {
       for (let x = 0; x <= this._width; x += this._scl) {
         const height_percent = y / this._height; // height ratio
         const width_percent = x / this._width; // width ratio
-        const omega = TWO_PI * 25; // sin omega
+        const omega = TWO_PI * 20; // sin omega
         const phi = height_percent * TWO_PI * 4 + percent * TWO_PI * 16; // sin phase
-        const ampl = this._lines_spacing * Math.sin(width_percent * omega + phi) * 0.35; // sin amplitude
 
+        let ampl = this._lines_spacing * Math.sin(width_percent * omega + phi) * 0.35; // sin amplitude
         // is this col picked? since the line is already picked, the pixel is picked
         const col_picked = line_picked.filter(p => Math.abs(p.x - x) < this._ratio);
-        let n = 1;
         if (col_picked.length > 0) {
           // add some noise if the letter is behind this pixel
-          n += Math.sin(width_percent * omega * 10) * Math.sin(time_theta) * 1.5;
+          ampl += Math.sin(time_theta) * random(-1, 1) * this._lines_spacing * 0.5;
+          // lower the risolution
+          x += this._scl * 2;
         }
 
-        this._ctx.lineTo(x, n * ampl);
+        this._ctx.lineTo(x, ampl);
       }
       this._ctx.stroke();
       this._ctx.restore();
@@ -139,7 +141,7 @@ class Sketch extends Engine {
   }
 }
 
-const ease = x => -(Math.cos(PI * x) - 1) / 2;
+const ease = x => x < 0.5 ? 4 * Math.pow(x, 3) : 1 - Math.pow(-2 * x + 2, 3) / 2;
 
 const xy_from_index = (i, width, ratio = 1) => {
   const x = i % width;
