@@ -12,8 +12,6 @@ class Sketch extends Engine {
     this._scl = 1; // pixel scaling in final image
     this._temp_canvas_size = 200;
 
-    this._angle = Math.PI / 2;
-
     this.loadTextPixels();
   }
 
