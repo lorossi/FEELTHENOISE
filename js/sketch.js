@@ -12,51 +12,7 @@ class Sketch extends Engine {
     this._scl = 1; // pixel scaling in final image
     this._temp_canvas_size = 200;
 
-    this.loadTextPixels();
-  }
-
-  loadTextPixels() {
-    // temp canvas parameters
-    const height = this._temp_canvas_size;
-    const width = this._temp_canvas_size;
-    const border = 0.1 * height;
-    this._temp_canvas_ratio = this._height / this._temp_canvas_size; // ratio between temp canvas and real canvas
-    // create temp canvas
-    let temp_canvas;
-    temp_canvas = document.createElement("canvas");
-    temp_canvas.setAttribute("width", width);
-    temp_canvas.setAttribute("height", height);
-    let temp_ctx;
-    temp_ctx = temp_canvas.getContext("2d", { alpha: false });
-    // write text on temp canvas
-    temp_ctx.save();
-    this.background("black");
-    temp_ctx.fillStyle = "white";
-    temp_ctx.textAlign = "center";
-    temp_ctx.textBaseline = "middle";
-    temp_ctx.font = `${(height - border) / 3}px Hack`;
-    temp_ctx.fillText("FEEL", width / 2, (height - border / 2) / 6 + border / 2);
-    temp_ctx.fillText("THE", width / 2, (height - border / 2) / 2 + border / 2);
-    temp_ctx.fillText("NOISE", width / 2, (height - border / 2) * 5 / 6 + border / 2);
-
-    // get pixels
-    const pixels = temp_ctx.getImageData(0, 0, width, height);
-    this.background("black");
-    temp_ctx.restore();
-
-    // now it's time to reduce the array
-    // keep track only if the pixels is empty or not
-    this._pixels = [];
-    for (let i = 0; i < pixels.data.length; i += 4) {
-      for (let j = 0; j < 3; j++) {
-        if (pixels.data[i + j] > 0) {
-          // get pos (1D array to 2D array) and push to the array of pixels
-          const pos = xy_from_index(parseInt(i / 4), pixels.width, this._temp_canvas_ratio);
-          this._pixels.push(pos);
-          break;
-        }
-      }
-    }
+    this._loadTextPixels();
   }
 
   setup() {
@@ -144,6 +100,51 @@ class Sketch extends Engine {
       this._ctx.restore();
     }
   }
+
+  _loadTextPixels() {
+    // temp canvas parameters
+    const height = this._temp_canvas_size;
+    const width = this._temp_canvas_size;
+    const border = 0.1 * height;
+    this._temp_canvas_ratio = this._height / this._temp_canvas_size; // ratio between temp canvas and real canvas
+    // create temp canvas
+    let temp_canvas;
+    temp_canvas = document.createElement("canvas");
+    temp_canvas.setAttribute("width", width);
+    temp_canvas.setAttribute("height", height);
+    let temp_ctx;
+    temp_ctx = temp_canvas.getContext("2d", { alpha: false });
+    // write text on temp canvas
+    temp_ctx.save();
+    this.background("black");
+    temp_ctx.fillStyle = "white";
+    temp_ctx.textAlign = "center";
+    temp_ctx.textBaseline = "middle";
+    temp_ctx.font = `${(height - border) / 3}px Hack`;
+    temp_ctx.fillText("FEEL", width / 2, (height - border / 2) / 6 + border / 2);
+    temp_ctx.fillText("THE", width / 2, (height - border / 2) / 2 + border / 2);
+    temp_ctx.fillText("NOISE", width / 2, (height - border / 2) * 5 / 6 + border / 2);
+
+    // get pixels
+    const pixels = temp_ctx.getImageData(0, 0, width, height);
+    this.background("black");
+    temp_ctx.restore();
+
+    // now it's time to reduce the array
+    // keep track only if the pixels is empty or not
+    this._pixels = [];
+    for (let i = 0; i < pixels.data.length; i += 4) {
+      for (let j = 0; j < 3; j++) {
+        if (pixels.data[i + j] > 0) {
+          // get pos (1D array to 2D array) and push to the array of pixels
+          const pos = xy_from_index(parseInt(i / 4), pixels.width, this._temp_canvas_ratio);
+          this._pixels.push(pos);
+          break;
+        }
+      }
+    }
+  }
+
 }
 
 const ease = x => x < 0.5 ? 4 * Math.pow(x, 3) : 1 - Math.pow(-2 * x + 2, 3) / 2;
