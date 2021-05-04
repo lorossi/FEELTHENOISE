@@ -21,7 +21,6 @@ class Sketch extends Engine {
     const width = this._temp_canvas_size;
     const border = 0.1 * height;
     this._temp_canvas_ratio = this._height / this._temp_canvas_size; // ratio between temp canvas and real canvas
-
     // create temp canvas
     let temp_canvas;
     temp_canvas = document.createElement("canvas");
@@ -108,8 +107,8 @@ class Sketch extends Engine {
 
         let ampl = this._lines_spacing * Math.sin(width_percent * omega + phi) * 0.35; // sin amplitude
         // is this col picked? since the line is already picked, the pixel is picked
-        const col_picked = line_picked.filter(p => Math.abs(p.x - x) < this._temp_canvas_ratio);
-        if (col_picked.length > 0) {
+        const col_picked = line_picked.some(p => Math.abs(p.x - x) < this._temp_canvas_ratio);
+        if (col_picked) {
           // add some noise if the letter is behind this pixel
           ampl += Math.sin(time_theta) * random(-1, 1) * this._lines_spacing * 0.5;
           // lower the risolution
@@ -121,7 +120,6 @@ class Sketch extends Engine {
       this._ctx.stroke();
       this._ctx.restore();
     }
-
 
     this._ctx.restore();
 
