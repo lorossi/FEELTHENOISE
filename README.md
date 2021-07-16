@@ -1,10 +1,6 @@
-# Empty HTML5 Canvas Project
+# Feel the noise
 
-I got bored of creating a new document every time.
-
-Contains all the needed files to create a new HTML5 page with a JS canvas inside.
-
-Just clone the repo or download the last release.
+Yet another video made in the single most counter intuitiva way.
 
 ## Credits
 
