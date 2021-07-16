@@ -6,6 +6,8 @@ I can't even place a gif in here because it weights about 50MB. Yeah, 50. I don'
 
 Check it out on my [Instagram profile](https://www.instagram.com/lorossi97/) where you can see a lot of my other stuff.
 
+If you're feeling brave you can find the rendered video in the `output` folder.
+
 ## Credits
 
 This project is distributed under Attribution 4.0 International (CC BY 4.0) license.
