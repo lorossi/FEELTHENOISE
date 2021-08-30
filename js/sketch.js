@@ -58,7 +58,7 @@ class Sketch extends Engine {
         const col_picked = line_picked.some(p => Math.abs(p.x - x) < this._temp_canvas_ratio);
         if (col_picked) {
           // add some noise if the letter is behind this pixel
-          module += Math.sin(time_theta) * random(-1, 1) * this._lines_spacing * 0.35;
+          module += Math.sin(time_theta) * random(-1, 1) * this._lines_spacing * 0.75;
           // lower the resolution
           x += this._scl * 2;
         }
@@ -131,7 +131,7 @@ class Sketch extends Engine {
 
 }
 
-const ease = x => -(Math.cos(Math.PI * x) - 1) / 2;
+const ease = x => x < 0.5 ? 2 * Math.pow(x, 2) : 1 - Math.pow(-2 * x + 2, 2) / 2;
 
 const xy_from_index = (i, width, ratio = 1) => {
   const x = i % width;
