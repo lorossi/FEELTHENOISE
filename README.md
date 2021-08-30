@@ -11,7 +11,7 @@ I have to say that I have been always fascinated by them *(how could you guess t
 
 I'm having quite a lot of fun with this kind of *"artsy"* sketches. I'm going to fiddle a lot more with those.
 
-Check the full video out on my [Instagram profile](https://www.instagram.com/lorossi97/) where you can see a lot of my other stuff as well.
+Check the full video out on my [Instagram profile](https://www.instagram.com/p/CTNnK2Ki2BX) where you can see a lot of my other stuff as well.
 If you're feeling brave you can find the rendered video in the `output` folder.
 
 ## Credits
